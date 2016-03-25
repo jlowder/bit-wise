@@ -1,0 +1,34 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(ql:quickload '(:bit-wise :rmatch))
+(defpackage :ros.script.binary.3667843148
+  (:use :cl :bit-wise :rmatch))
+(in-package :ros.script.binary.3667843148)
+
+(defun usage ()
+  (princ "Usage: slip [-1] -l|-r num-bits infile [outfile]"))
+
+(defun/match slip (l)
+  ((()) (usage))
+  ((("-?")) (usage))
+  ((("-h")) (usage))
+  ((("-l" n name)) (emit-hex (slip-l (parse-integer n) (file->bits name))))
+  ((("-r" n name)) (emit-hex (slip-r (parse-integer n) (file->bits name))))
+  ((("-1" "-l" n name)) (emit-hex (slip-l (parse-integer n) (file->bits name) 1)))
+  ((("-1" "-r" n name)) (emit-hex (slip-r (parse-integer n) (file->bits name) 1)))
+  ((("-l" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
+                         (loop for b in (bits->bytes (slip-l (parse-integer n) (file->bits name))) do (write-byte b s))))
+  ((("-r" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
+                         (loop for b in (bits->bytes (slip-r (parse-integer n) (file->bits name))) do (write-byte b s))))
+  ((("-1" "-l" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
+                              (loop for b in (bits->bytes (slip-l (parse-integer n) (file->bits name) 1)) do (write-byte b s))))
+  ((("-1" "-r" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
+                              (loop for b in (bits->bytes (slip-r (parse-integer n) (file->bits name) 1)) do (write-byte b s)))))
+
+(defun main (&rest argv)
+  (slip argv)
+  (terpri))
+

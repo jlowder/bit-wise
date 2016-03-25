@@ -1,0 +1,18 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(ql:quickload '(:bit-wise :rmatch))
+(defpackage :ros.script.binary.3667843148
+  (:use :cl :bit-wise :rmatch))
+(in-package :ros.script.binary.3667843148)
+
+(defun/match binary (l)
+  ((("-h" name)) (emit-hex (file->bits name)))
+  (((name)) (emit-binary (file->bits name))))
+
+(defun main (&rest argv)
+  (binary argv)
+  (terpri))
+
