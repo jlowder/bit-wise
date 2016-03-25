@@ -12,9 +12,6 @@ exec ros -Q -- $0 "$@"
   (princ "Usage: slip [-1] -l|-r num-bits infile [outfile]"))
 
 (defun/match slip (l)
-  ((()) (usage))
-  ((("-?")) (usage))
-  ((("-h")) (usage))
   ((("-l" n name)) (emit-hex (slip-l (parse-integer n) (file->bits name))))
   ((("-r" n name)) (emit-hex (slip-r (parse-integer n) (file->bits name))))
   ((("-1" "-l" n name)) (emit-hex (slip-l (parse-integer n) (file->bits name) 1)))
@@ -26,7 +23,8 @@ exec ros -Q -- $0 "$@"
   ((("-1" "-l" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
                               (loop for b in (bits->bytes (slip-l (parse-integer n) (file->bits name) 1)) do (write-byte b s))))
   ((("-1" "-r" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
-                              (loop for b in (bits->bytes (slip-r (parse-integer n) (file->bits name) 1)) do (write-byte b s)))))
+                              (loop for b in (bits->bytes (slip-r (parse-integer n) (file->bits name) 1)) do (write-byte b s))))
+  ((_) (usage)))
 
 (defun main (&rest argv)
   (slip argv)
