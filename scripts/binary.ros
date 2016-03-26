@@ -9,8 +9,10 @@ exec ros -Q -- $0 "$@"
 (in-package :ros.script.binary.3667843148)
 
 (defun/match binary (l)
-  ((("-h" name)) (emit-hex (file->bits name)))
-  (((name)) (emit-binary (file->bits name))))
+  ((("-h" "-")) (emit-hex (stream->bits *standard-input*)) (terpri))
+  ((("-h" name)) (emit-hex (file->bits name)) (terpri))
+  ((("-")) (emit-binary (stream->bits *standard-input*)) (terpri))
+  (((name)) (emit-binary (file->bits name)) (terpri)))
 
 (defun main (&rest argv)
   (binary argv)

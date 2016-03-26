@@ -3,21 +3,30 @@
 #|
 exec ros -Q -- $0 "$@"
 |#
-(ql:quickload '(:bit-wise :rmatch))
+(ql:quickload '(:bit-wise :rmatch) :silent t)
 (defpackage :ros.script.binary.3667843148
   (:use :cl :bit-wise :rmatch))
 (in-package :ros.script.binary.3667843148)
 
 (defun usage ()
-  (princ "Usage: slip [-1] -l|-r num-bits infile [outfile]"))
+  (write-line "Usage: slip [-1] [[-l|-r] num-bits] [infile] [outfile]")
+  (terpri)
+  (write-line "-1: pad with ones instead of zeros") 
+  (write-line "-l: slip to the left")
+  (write-line "-r: slip to the right")
+  (write-line "num-bits: number of bits to slip")
+  (write-line "infile: name of file to read")
+  (write-line "outfile: name of file to write, or - for standard out"))
 
 (defun/match slip (l)
   ((("-l" n name)) (emit-hex (slip-l (parse-integer n) (file->bits name))))
   ((("-r" n name)) (emit-hex (slip-r (parse-integer n) (file->bits name))))
   ((("-1" "-l" n name)) (emit-hex (slip-l (parse-integer n) (file->bits name) 1)))
   ((("-1" "-r" n name)) (emit-hex (slip-r (parse-integer n) (file->bits name) 1)))
+  ((("-l" n name "-")) (loop for b in (bits->bytes (slip-l (parse-integer n) (file->bits name))) do (write-byte b *standard-output*)))
   ((("-l" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
                          (loop for b in (bits->bytes (slip-l (parse-integer n) (file->bits name))) do (write-byte b s))))
+  ((("-l" n name "-")) (loop for b in (bits->bytes (slip-r (parse-integer n) (file->bits name))) do (write-byte b *standard-output*)))
   ((("-r" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
                          (loop for b in (bits->bytes (slip-r (parse-integer n) (file->bits name))) do (write-byte b s))))
   ((("-1" "-l" n name out)) (with-open-file (s out :direction :output :element-type 'unsigned-byte :if-exists :supersede)
@@ -27,6 +36,5 @@ exec ros -Q -- $0 "$@"
   ((_) (usage)))
 
 (defun main (&rest argv)
-  (slip argv)
-  (terpri))
+  (slip argv))
 

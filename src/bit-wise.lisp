@@ -7,14 +7,14 @@
   (:export :byte->bits
            :bits->byte
            :bits->bytes
+           :stream->bits
            :file->bits
            :emit-hex
            :emit-binary
            :slip-l
            :slip-r
            :list-contains
-           :invert
-           :drop))
+           :invert))
 
 (in-package :bit-wise)
 
@@ -32,13 +32,16 @@
     (destructuring-bind (a b c d e f g h &rest r) (padright bits)
       (cons (bits->byte (list a b c d e f g h)) (bits->bytes r)))))
 
+(defun stream->bits (stream)
+  (loop 
+   for val = (read-byte stream nil nil)
+   until (eq val nil)
+   appending (byte->bits val)))
+
 (defun file->bits (name)
   (with-open-file (stream name :element-type 'unsigned-byte)
-    (loop 
-       for val = (read-byte stream nil nil)
-       until (eq val nil)
-       appending (byte->bits val))))
-
+                  (stream->bits stream)))
+                  
 (defun emit-hex (bits &optional (stream *standard-output*) (offset 0))
   (when bits
     (destructuring-bind (a b c d e f g h &rest r) (padright bits)
@@ -91,8 +94,3 @@
 
 (defun invert (bits)
   (mapcar #'(lambda (x) (- 1 x)) bits))
-
-(defun/match drop (l n)
-  ((nil _) nil)
-  ((a 0) a)
-  ((a b) (drop (cdr a) (- b 1))))
