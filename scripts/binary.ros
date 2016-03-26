@@ -8,13 +8,20 @@ exec ros -Q -- $0 "$@"
   (:use :cl :bit-wise :rmatch))
 (in-package :ros.script.binary.3667843148)
 
+(defun usage ()
+  (write-line "Usage: binary [-h] filename")
+  (terpri)
+  (write-line "-h: dump in hex instead of binary")
+  (write-line "filename: name of the file to dump, or - for stdin"))
+
 (defun/match binary (l)
-  ((("-h" "-")) (emit-hex (stream->bits *standard-input*)) (terpri))
-  ((("-h" name)) (emit-hex (file->bits name)) (terpri))
-  ((("-")) (emit-binary (stream->bits *standard-input*)) (terpri))
-  (((name)) (emit-binary (file->bits name)) (terpri)))
+  ((("-h")) (usage))
+  ((("-h" "-")) (progn (emit-hex (stream->bits *standard-input*)) (terpri)))
+  ((("-h" name)) (progn (emit-hex (file->bits name)) (terpri)))
+  ((("-")) (progn (emit-binary (stream->bits *standard-input*)) (terpri)))
+  (((name)) (progn (emit-binary (file->bits name)) (terpri)))
+  ((_) (usage)))
 
 (defun main (&rest argv)
-  (binary argv)
-  (terpri))
+  (binary argv))
 
