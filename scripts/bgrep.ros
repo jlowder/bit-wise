@@ -1,0 +1,47 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(ql:quickload '(:bit-wise :rmatch) :silent t)
+(defpackage :ros.script.bgrep.3668074732
+  (:use :cl :bit-wise :rmatch))
+(in-package :ros.script.bgrep.3668074732)
+
+(defun usage ()
+  (write-line "Usage: bgrep [-h] [pattern] filename")
+  (terpri)
+  (write-line "-h: pattern is hex instead of binary")
+  (write-line "pattern: binary pattern to search for")
+  (write-line "filename: name of the file to search, or - for stdin"))
+
+(defun inbits ()
+  (stream->bits *standard-input*))
+
+(defun as-bin (p)
+  (loop for x across p
+       collect (digit-char-p x)))
+
+(defun as-hex (p)
+  (labels ((rebyte (l)
+             (when l
+               (destructuring-bind (b1 b2 &rest r) l
+                 (cons (+ (* b1 16) b2) (rebyte r))))))
+    (bytes->bits (rebyte (loop for x across (string-downcase p)
+                            collect (digit-char-p x 16))))))
+
+(defun do-bgrep (p bits)
+  (multiple-value-bind (r loc) (list-contains p bits)
+    (when r
+      (format t "~a~%" loc))))
+
+(defun/match bgrep (l)
+  ((("-h")) (usage))
+  ((("-h" p "-")) (do-bgrep (as-hex p) (inbits)))
+  ((("-h" p name)) (do-bgrep (as-hex p) (file->bits name)))
+  (((p "-")) (do-bgrep (as-bin p) (inbits)))
+  (((p name)) (do-bgrep (as-bin p) (file->bits name)))
+  ((_) (usage)))
+
+(defun main (&rest argv)
+  (bgrep argv))

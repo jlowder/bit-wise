@@ -7,6 +7,7 @@
   (:export :byte->bits
            :bits->byte
            :bits->bytes
+           :bytes->bits
            :stream->bits
            :file->bits
            :emit-hex
@@ -31,6 +32,9 @@
   (when bits
     (destructuring-bind (a b c d e f g h &rest r) (padright bits)
       (cons (bits->byte (list a b c d e f g h)) (bits->bytes r)))))
+
+(defun bytes->bits (b)
+  (loop for x in b appending (byte->bits x)))
 
 (defun stream->bits (stream)
   (loop 

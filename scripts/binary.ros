@@ -3,7 +3,7 @@
 #|
 exec ros -Q -- $0 "$@"
 |#
-(ql:quickload '(:bit-wise :rmatch))
+(ql:quickload '(:bit-wise :rmatch) :silent t)
 (defpackage :ros.script.binary.3667843148
   (:use :cl :bit-wise :rmatch))
 (in-package :ros.script.binary.3667843148)
