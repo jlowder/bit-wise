@@ -12,6 +12,7 @@ exec ros -Q -- $0 "$@"
   (write-line "Usage: bgrep [-h] [pattern] filename")
   (terpri)
   (write-line "-h: pattern is hex instead of binary")
+  (write-line "-a: show all matches instead of just the first")
   (write-line "pattern: binary pattern to search for")
   (write-line "filename: name of the file to search, or - for stdin"))
 
