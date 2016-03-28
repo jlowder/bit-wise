@@ -1,0 +1,36 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(ql:quickload '(:bit-wise :rmatch) :silent t)
+(defpackage :ros.script.invert.ros.3668172120
+  (:use :cl :bit-wise :rmatch))
+(in-package :ros.script.invert.ros.3668172120)
+
+(defun stream-bits (s bits)
+  (loop for b in (bits->bytes bits)
+     do (write-byte b s)))
+
+(defun inbits ()
+  (stream->bits *standard-input*))
+
+(defun usage ()
+  (write-line "invert - invert the bits in a file")
+  (terpri)
+  (write-line "usage: invert input-filename output-filename")
+  (terpri)
+  (write-line "input-filename: filename to read from, or - for stdin")
+  (write-line "output-filename: filename to write to, or - for stdin"))
+
+(defun/match inv (l)
+  ((("-" "-")) (stream-bits *standard-output* (invert (inbits))))
+  (((name "-")) (stream-bits *standard-output* (invert (file->bits name))))
+  ((("-" name))  (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :supersede)
+                   (stream-bits s (invert (inbits))))) 
+  (((inname outname)) (with-open-file (s outname :direction :output :element-type 'unsigned-byte :if-exists :supersede)
+                        (stream-bits s (invert (file->bits inname)))))
+  ((_) (usage)))
+
+(defun main (&rest argv)
+  (inv argv))

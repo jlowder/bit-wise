@@ -15,6 +15,7 @@
            :slip-l
            :slip-r
            :list-contains
+           :list-contains-all
            :invert))
 
 (in-package :bit-wise)
@@ -95,6 +96,12 @@
         (values t off)
         (list-contains sl (cdr bl) (+ off 1)))
     (values nil 0)))
+
+(defun list-contains-all (sl bl &optional (off 0))
+  (when bl
+    (if (list-compare sl bl)
+        (cons off (list-contains-all sl (cdr bl) (+ 1 off)))
+        (list-contains-all sl (cdr bl) (+ 1 off)))))
 
 (defun invert (bits)
   (mapcar #'(lambda (x) (- 1 x)) bits))

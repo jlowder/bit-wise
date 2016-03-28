@@ -1,0 +1,57 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(ql:quickload '(:bit-wise :rmatch) :silent t)
+(defpackage :ros.script.genbin.3668173254
+  (:use :cl :bit-wise :rmatch))
+(in-package :ros.script.genbin.3668173254)
+
+(defun stream-bits (s bits)
+  (loop for b in (bits->bytes bits)
+     do (write-byte b s)))
+
+(defun as-bin (p)
+  (loop for x across p
+       collect (digit-char-p x)))
+
+(defun as-hex (p)
+  (labels ((rebyte (l)
+             (when l
+               (destructuring-bind (b1 b2 &rest r) l
+                 (cons (+ (* b1 16) b2) (rebyte r))))))
+    (bytes->bits (rebyte (loop for x across (string-downcase p)
+                            collect (digit-char-p x 16))))))
+
+(defun usage ()
+  (write-line "genbin - generate binary patterns")
+  (terpri)
+  (write-line "genbin [-r num] [-h] pattern filename")
+  (terpri)
+  (write-line "-r num: repeat the pattern num times")
+  (write-line "-h: pattern is hex rather than binary")
+  (write-line "pattern: binary pattern to generate")
+  (write-line "filename: output filename, or - for stdout"))
+              
+(defun/match genbin (l)
+  ((("-h" p "-")) (stream-bits *standard-output* (as-hex p)))
+  ((("-h" p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
+                     (stream-bits s (as-hex p))))
+  (((p "-")) (stream-bits *standard-output* (as-bin p)))
+  (((p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
+                (stream-bits s (as-bin p))))
+  ((("-r" n "-h" p "-")) (loop repeat (parse-integer n) do
+                              (stream-bits *standard-output* (as-hex p))))
+  ((("-r" n "-h" p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
+                            (loop repeat (parse-integer n) do
+                                 (stream-bits s (as-hex p)))))
+  ((("-r" n p "-")) (loop repeat (parse-integer n) do
+                         (stream-bits *standard-output* (as-bin p))))
+  ((("-r" n p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
+                      (loop repeat (parse-integer n) do
+                           (stream-bits s (as-bin p)))))
+  ((_) (usage)))
+
+(defun main (&rest argv)
+  (genbin argv))

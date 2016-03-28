@@ -9,7 +9,7 @@ exec ros -Q -- $0 "$@"
 (in-package :ros.script.binary.3667843148)
 
 (defun usage ()
-  (write-line "Usage: slip [-1] [[-l|-r] num-bits] [infile] [outfile]")
+  (write-line "Usage: slip [-1] [-l | -r] num-bits infile outfile")
   (terpri)
   (write-line "-1: pad with ones instead of zeros") 
   (write-line "-l: slip to the left")
