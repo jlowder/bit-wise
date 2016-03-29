@@ -26,8 +26,8 @@
 (in-package :bit-wise)
 
 (defun byte->bits (val)
-  (loop for i from 7 downto 0
-     collect (ldb (byte 1 i) val)))
+  (coerce (loop for i from 7 downto 0
+             collect (ldb (byte 1 i) val)) 'bit-vector))
 
 (defun bits->byte (bits &optional (mult 128))
   (if bits
@@ -35,18 +35,19 @@
       0))
 
 (defun bits->bytes (bits)
-  (when bits
-    (destructuring-bind (a b c d e f g h &rest r) (padright bits)
-      (cons (bits->byte (list a b c d e f g h)) (bits->bytes r)))))
+  (when (> (length bits) 0)
+    (cons (bits->byte (loop for i from 0 to 7 collect (elt bits i)))
+          (bits->bytes (subseq bits 8)))))
 
 (defun bytes->bits (b)
-  (loop for x in b appending (byte->bits x)))
+  (when b
+    (concatenate 'bit-vector (byte->bits (car b)) (bytes->bits (cdr b)))))
 
-(defun stream->bits (stream)
-  (loop 
-   for val = (read-byte stream nil nil)
-   until (eq val nil)
-   appending (byte->bits val)))
+(defun stream->bits (stream &optional (v #*))
+  (let ((b (read-byte stream nil nil)))
+    (if b
+        (stream->bits stream (concatenate 'bit-vector v (byte->bits b)))
+        v)))
 
 (defun file->bits (name)
   (with-open-file (stream name :element-type 'unsigned-byte)
@@ -78,11 +79,12 @@
         (emit-binary (cdr bits) stream (+ offset 1)))))
 
 (defun padright (bits &optional (val 0))
-  (when bits
-    (let ((p (mod (length bits) 8)))
-      (if (> p 0)
-          (append bits (make-list (- 8 p) :initial-element val))
-          bits))))
+  (let* ((len (length bits))
+         (p (mod len 8)))
+    (if (> p 0)
+        (concatenate 'bit-vector bits
+                     (coerce (make-list (- 8 p) :initial-element val) 'bit-vector))
+        bits)))
 
 (defun slip-l (n bits &optional (pad 0))
   (padright (subseq bits n) pad))
@@ -91,33 +93,33 @@
   (reverse (slip-l n (reverse bits) pad)))
 
 (defun/match list-compare (l1 l2)
-  ((nil _) t)
-  ((_ nil) nil)
-  ((a b) (and (equal (car a) (car b)) (list-compare (cdr a) (cdr b)))))
+  ((#* _) t)
+  ((_ #*) nil)
+  ((a b) (and (equal (elt a 0) (elt b 0)) (list-compare (subseq a 1) (subseq b 1)))))
 
 (defun list-contains (sl bl &optional (off 0))
-  (if bl
+  (if (not (equal #* bl))
     (if (list-compare sl bl)
         (values t off)
-        (list-contains sl (cdr bl) (+ off 1)))
+        (list-contains sl (subseq bl 1) (+ off 1)))
     (values nil 0)))
 
 (defun list-contains-all (sl bl &optional (off 0))
-  (when bl
+  (when (not (equal #* bl))
     (if (list-compare sl bl)
-        (cons off (list-contains-all sl (cdr bl) (+ 1 off)))
-        (list-contains-all sl (cdr bl) (+ 1 off)))))
+        (cons off (list-contains-all sl (subseq bl 1) (+ 1 off)))
+        (list-contains-all sl (subseq bl 1) (+ 1 off)))))
 
 (defun invert (bits)
-  (mapcar #'(lambda (x) (- 1 x)) bits))
+  (bit-not bits))
 
 (defun stream-bits (s bits)
   (loop for b in (bits->bytes bits)
      do (write-byte b s)))
 
 (defun as-bin (p)
-  (loop for x across p
-       collect (digit-char-p x)))
+  (coerce (loop for x across p
+             collect (digit-char-p x)) 'bit-vector))
 
 (defun as-hex (p)
   (labels ((rebyte (l)
