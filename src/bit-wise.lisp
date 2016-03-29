@@ -16,7 +16,12 @@
            :slip-r
            :list-contains
            :list-contains-all
-           :invert))
+           :invert
+           :stream-bits
+           :as-bin
+           :as-hex
+           :write-slip
+           :inbits))
 
 (in-package :bit-wise)
 
@@ -105,3 +110,26 @@
 
 (defun invert (bits)
   (mapcar #'(lambda (x) (- 1 x)) bits))
+
+(defun stream-bits (s bits)
+  (loop for b in (bits->bytes bits)
+     do (write-byte b s)))
+
+(defun as-bin (p)
+  (loop for x across p
+       collect (digit-char-p x)))
+
+(defun as-hex (p)
+  (labels ((rebyte (l)
+             (when l
+               (destructuring-bind (b1 b2 &rest r) l
+                 (cons (+ (* b1 16) b2) (rebyte r))))))
+    (bytes->bits (rebyte (loop for x across (string-downcase p)
+                            collect (digit-char-p x 16))))))
+
+(defun write-slip (n s bits pad slip)
+  (loop for b in (bits->bytes (funcall slip (parse-integer n) bits pad))
+     do (write-byte b s)))
+
+(defun inbits ()
+  (stream->bits *standard-input*))

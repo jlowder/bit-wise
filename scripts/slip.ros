@@ -18,13 +18,6 @@ exec ros -Q -- $0 "$@"
   (write-line "infile: name of file to read")
   (write-line "outfile: name of file to write, or - for standard out"))
 
-(defun write-slip (n s bits pad slip)
-  (loop for b in (bits->bytes (funcall slip (parse-integer n) bits pad))
-     do (write-byte b s)))
-
-(defun inbits ()
-  (stream->bits *standard-input*))
-
 (defun/match slip (l)
   ((("-l" n "-" "-")) (write-slip n *standard-output* (inbits) 0 #'slip-l))
   ((("-l" n name "-")) (write-slip n *standard-output* (file->bits name) 0 #'slip-l))

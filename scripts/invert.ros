@@ -8,13 +8,6 @@ exec ros -Q -- $0 "$@"
   (:use :cl :bit-wise :rmatch))
 (in-package :ros.script.invert.ros.3668172120)
 
-(defun stream-bits (s bits)
-  (loop for b in (bits->bytes bits)
-     do (write-byte b s)))
-
-(defun inbits ()
-  (stream->bits *standard-input*))
-
 (defun usage ()
   (write-line "invert - invert the bits in a file")
   (terpri)

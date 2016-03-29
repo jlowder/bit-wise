@@ -17,21 +17,6 @@ exec ros -Q -- $0 "$@"
   (write-line "pattern: pattern to search for, assumed binary unless -h is used")
   (write-line "filename: name of the file to search, or - for stdin"))
 
-(defun inbits ()
-  (stream->bits *standard-input*))
-
-(defun as-bin (p)
-  (loop for x across p
-       collect (digit-char-p x)))
-
-(defun as-hex (p)
-  (labels ((rebyte (l)
-             (when l
-               (destructuring-bind (b1 b2 &rest r) l
-                 (cons (+ (* b1 16) b2) (rebyte r))))))
-    (bytes->bits (rebyte (loop for x across (string-downcase p)
-                            collect (digit-char-p x 16))))))
-
 (defun do-bgrep (p bits)
   (multiple-value-bind (r loc) (list-contains p bits)
     (when r
