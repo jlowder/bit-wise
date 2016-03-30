@@ -115,12 +115,12 @@
         (values t s)
       (values nil 0))))
 
-(defun list-contains-all (sl bl &optional (off 0))
-  (when (not (equal #* bl))
-    (multiple-value-bind (a b) (list-contains sl bl)
-      (if a
-          (cons (+ off b) (list-contains-all sl (subseq bl (+ b 1)) (+ off b 1)))
-        nil))))
+(defun list-contains-all (sl bl)
+  (loop for oo = 0 then (+ 1 off)
+        as off = (search sl bl :start2 oo)
+        when off collecting off into coll
+        do (unless off (loop-finish))
+        finally (return coll)))
 
 (defun invert (bits)
   (bit-not bits))
