@@ -8,6 +8,7 @@
            :bytes->bits
            :stream->bits
            :file->bits
+           :bv->bits
            :emit-hex
            :emit-binary
            :slip-l
@@ -61,6 +62,10 @@
                     (read-sequence buf stream)
                     (seq->bits buf bits)
                     bits)))
+
+(defun bv->bits (bv)
+  (when (not (equal #* bv))
+    (append (coerce (subseq bv 0 8) 'list) (bv->bits (subseq bv 8)))))
 
 (defun emit-hex (bits &optional (stream *standard-output*) (offset 0))
   (when bits

@@ -16,10 +16,10 @@ exec ros -Q -- $0 "$@"
 
 (defun/match binary (l)
   ((("-h")) (usage))
-  ((("-h" "-")) (progn (emit-hex (stream->bits *standard-input*)) (terpri)))
-  ((("-h" name)) (progn (emit-hex (file->bits name)) (terpri)))
-  ((("-")) (progn (emit-binary (stream->bits *standard-input*)) (terpri)))
-  (((name)) (progn (emit-binary (file->bits name)) (terpri)))
+  ((("-h" "-")) (progn (emit-hex (bv->bits (stream->bits *standard-input*))) (terpri)))
+  ((("-h" name)) (progn (emit-hex (bv->bits (file->bits name))) (terpri)))
+  ((("-")) (progn (emit-binary (bv->bits (stream->bits *standard-input*))) (terpri)))
+  (((name)) (progn (emit-binary (bv->bits (file->bits name))) (terpri)))
   ((_) (usage)))
 
 (defun main (&rest argv)
