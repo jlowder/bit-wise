@@ -1,0 +1,30 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(ql:quickload '(:bit-wise :rmatch) :silent t)
+(defpackage :ros.script.xor.3668341001
+  (:use :cl :bit-wise :rmatch))
+(in-package :ros.script.xor.3668341001)
+
+(defun usage ()
+  (write-line "xor - exclusive-or a bit pattern into a file")
+  (terpri)
+  (write-line "usage: xor pattern input-filename output-filename")
+  (terpri)
+  (write-line "pattern: arbitrary-length bit pattern to xor.")
+  (write-line "input-filename: filename to read from, or - for stdin")
+  (write-line "output-filename: filename to write to, or - for stdout"))
+
+(defun/match inv (l)
+  (((p "-" "-")) (stream-bits *standard-output* (xor-bits (as-bin p) (inbits))))
+  (((p name "-")) (stream-bits *standard-output* (xor-bits (as-bin p) (file->bits name))))
+  (((p "-" name))  (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :supersede)
+                   (stream-bits s (xor-bits (as-bin p) (inbits)))))
+  (((p inname outname)) (with-open-file (s outname :direction :output :element-type 'unsigned-byte :if-exists :supersede)
+					(stream-bits s (xor-bits (as-bin p) (file->bits inname)))))
+  ((_) (usage)))
+
+(defun main (&rest argv)
+  (inv argv))

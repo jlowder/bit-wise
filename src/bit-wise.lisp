@@ -20,7 +20,8 @@
            :as-bin
            :as-hex
            :write-slip
-           :inbits))
+           :inbits
+	   :xor-bits))
 
 (in-package :bit-wise)
 
@@ -107,12 +108,14 @@
   (reverse (slip-l n (reverse bits) pad)))
 
 (defun list-contains (sl bl)
+  "see if a small list occurs within a bigger list. return boolean result and location of occurrence."
   (let ((s (search sl bl)))
     (if s
         (values t s)
       (values nil 0))))
 
 (defun list-contains-all (sl bl)
+  "return a list of all occurrences of sl within bl"
   (loop for oo = 0 then (+ 1 off)
         as off = (search sl bl :start2 oo)
         when off collecting off into coll
@@ -144,3 +147,14 @@
 
 (defun inbits ()
   (stream->bits *standard-input*))
+
+(defun blit (l p)
+  "make a vector of length l, repeat p into it enough times to fill it"
+  (let ((bits (make-sequence 'bit-vector l))
+	(pl (length p)))
+    (loop for x from 0 to l by pl do (replace bits p :start1 x))
+    bits))
+	
+(defun xor-bits (sl bl)
+  "xor a small list into a bigger list"
+  (bit-xor (blit (length bl) sl) bl))

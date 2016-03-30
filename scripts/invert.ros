@@ -14,7 +14,7 @@ exec ros -Q -- $0 "$@"
   (write-line "usage: invert input-filename output-filename")
   (terpri)
   (write-line "input-filename: filename to read from, or - for stdin")
-  (write-line "output-filename: filename to write to, or - for stdin"))
+  (write-line "output-filename: filename to write to, or - for stdout"))
 
 (defun/match inv (l)
   ((("-" "-")) (stream-bits *standard-output* (invert (inbits))))
