@@ -49,10 +49,22 @@
         (stream->bits stream (concatenate 'bit-vector v (byte->bits b)))
         v)))
 
+
+(defun seq->bits (seq bits)
+  (loop for x across seq
+        as j = 0 then (+ 1 j)
+        do (replace bits (byte->bits (elt seq j)) :start1 (* j 8)))
+  bits)
+  
 (defun file->bits (name)
   (with-open-file (stream name :element-type 'unsigned-byte)
-                  (stream->bits stream)))
-                  
+                  (let* ((len (file-length stream))
+                         (bits (make-sequence 'bit-vector (* len 8)))
+                         (buf (make-sequence '(vector unsigned-byte) len)))
+                    (read-sequence buf stream)
+                    (seq->bits buf bits)
+                    bits)))
+
 (defun emit-hex (bits &optional (stream *standard-output*) (offset 0))
   (when bits
     (destructuring-bind (a b c d e f g h &rest r) (padright bits)
@@ -97,18 +109,18 @@
   ((_ #*) nil)
   ((a b) (and (equal (elt a 0) (elt b 0)) (list-compare (subseq a 1) (subseq b 1)))))
 
-(defun list-contains (sl bl &optional (off 0))
-  (if (not (equal #* bl))
-    (if (list-compare sl bl)
-        (values t off)
-        (list-contains sl (subseq bl 1) (+ off 1)))
-    (values nil 0)))
+(defun list-contains (sl bl)
+  (let ((s (search sl bl)))
+    (if s
+        (values t s)
+      (values nil 0))))
 
 (defun list-contains-all (sl bl &optional (off 0))
   (when (not (equal #* bl))
-    (if (list-compare sl bl)
-        (cons off (list-contains-all sl (subseq bl 1) (+ 1 off)))
-        (list-contains-all sl (subseq bl 1) (+ 1 off)))))
+    (multiple-value-bind (a b) (list-contains sl bl)
+      (if a
+          (cons (+ off b) (list-contains-all sl (subseq bl (+ b 1)) (+ off b 1)))
+        nil))))
 
 (defun invert (bits)
   (bit-not bits))

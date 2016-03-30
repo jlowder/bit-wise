@@ -36,7 +36,9 @@ exec ros -Q -- $0 "$@"
   ((("-a" "-h" p name)) (do-bgrep-all (as-hex p) (file->bits name)))
   ((("-n" "-h" p name)) (do-bgrep-num (as-hex p) (file->bits name)))
   ((("-a" p "-")) (do-bgrep-all (as-bin p) (inbits)))
+  ((("-a" p name)) (do-bgrep-all (as-bin p) (file->bits name)))
   ((("-n" p "-")) (do-bgrep-num (as-bin p) (inbits)))
+  ((("-n" p name)) (do-bgrep-num (as-bin p) (file->bits name)))
   (((p name)) (do-bgrep (as-bin p) (file->bits name)))
   ((_) (usage)))
 
