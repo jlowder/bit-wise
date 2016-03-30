@@ -4,8 +4,6 @@
     :author "Jason Lowdermilk <jlowdermilk@gmail.com>"
     :licence "MIT"
     :description "A collection of bit-level file utilities"
-    :depends-on (:rmatch
-                 :cl-ppcre)
     :components
     ((:module "src"
               :components 

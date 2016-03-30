@@ -1,9 +1,7 @@
 (in-package :cl-user)
 
 (defpackage bit-wise
-  (:use :cl
-        :cl-ppcre
-        :rmatch)
+  (:use :cl)
   (:export :byte->bits
            :bits->byte
            :bits->bytes
@@ -48,7 +46,6 @@
     (if b
         (stream->bits stream (concatenate 'bit-vector v (byte->bits b)))
         v)))
-
 
 (defun seq->bits (seq bits)
   (loop for x across seq
@@ -103,11 +100,6 @@
 
 (defun slip-r (n bits &optional (pad 0))
   (reverse (slip-l n (reverse bits) pad)))
-
-(defun/match list-compare (l1 l2)
-  ((#* _) t)
-  ((_ #*) nil)
-  ((a b) (and (equal (elt a 0) (elt b 0)) (list-compare (subseq a 1) (subseq b 1)))))
 
 (defun list-contains (sl bl)
   (let ((s (search sl bl)))
