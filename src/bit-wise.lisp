@@ -35,9 +35,9 @@
       0))
 
 (defun bits->bytes (bits)
-  (when (> (length bits) 0)
-    (cons (bits->byte (loop for i from 0 to 7 collect (elt bits i)))
-          (bits->bytes (subseq bits 8)))))
+  (loop for x to (- (length bits) 8) by 8
+     as b = (subseq bits x (+ x 8))
+     collect (bits->byte (coerce b 'list))))
 
 (defun bytes->bits (b)
   (when b
@@ -154,7 +154,7 @@
 	(pl (length p)))
     (loop for x from 0 to l by pl do (replace bits p :start1 x))
     bits))
-	
+
 (defun xor-bits (sl bl)
   "xor a small list into a bigger list"
   (bit-xor (blit (length bl) sl) bl))
