@@ -9,12 +9,14 @@ exec ros -Q -- $0 "$@"
 (in-package :ros.script.bgrep.3668074732)
 
 (defun usage ()
+  (write-line "bgrep (binary grep) - find patterns at arbitrary bit alignments")
+  (terpri)
   (write-line "Usage: bgrep [ -n | -a ] [-h] pattern filename")
   (terpri)
-  (write-line "-h: pattern is hex instead of binary")
-  (write-line "-a: show all matches instead of just the first")
   (write-line "-n: show the number of matches")
-  (write-line "pattern: pattern to search for, assumed binary unless -h is used")
+  (write-line "-a: show all matches instead of just the first")
+  (write-line "-h: pattern is hex instead of binary")
+  (write-line "pattern: pattern to search for. Binary is assumed unless -h is used.")
   (write-line "filename: name of the file to search, or - for stdin"))
 
 (defun do-bgrep (p bits)

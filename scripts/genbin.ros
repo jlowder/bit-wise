@@ -3,9 +3,9 @@
 #|
 exec ros -Q -- $0 "$@"
 |#
-(ql:quickload '(:bit-wise :rmatch) :silent t)
+(ql:quickload '(:bit-wise :rmatch :cl-ppcre) :silent t)
 (defpackage :ros.script.genbin.3668173254
-  (:use :cl :bit-wise :rmatch))
+  (:use :cl :bit-wise :rmatch :cl-ppcre))
 (in-package :ros.script.genbin.3668173254)
 
 (defun usage ()
@@ -15,26 +15,38 @@ exec ros -Q -- $0 "$@"
   (terpri)
   (write-line "-r num: repeat the pattern num times")
   (write-line "-h: pattern is hex rather than binary")
-  (write-line "pattern: binary pattern to generate")
+  (write-line "pattern: pattern to generate. Binary is assumed unless -h is used, or ")
+  (write-line "         if the pattern has the format  \"X..Y\". In that case it will")
+  (write-line "         generate incrementing (or decrementing) integers from X to Y.")
   (write-line "filename: output filename, or - for stdout"))
-              
+
+(defun pattern (p)
+  (destructuring-bind (a &rest b) (split "\\.\\." p)
+    (if b
+        (let ((a (parse-integer a))
+              (b (parse-integer (car b))))
+          (bytes->bits (if (< a b)
+                           (loop for x from a to b collect x)
+                           (loop for x from a downto b collect x))))
+        (as-bin a))))
+
 (defun/match genbin (l)
   ((("-h" p "-")) (stream-bits *standard-output* (as-hex p)))
   ((("-h" p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
                      (stream-bits s (as-hex p))))
-  (((p "-")) (stream-bits *standard-output* (as-bin p)))
+  (((p "-")) (stream-bits *standard-output* (pattern p)))
   (((p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
-                (stream-bits s (as-bin p))))
+                (stream-bits s (pattern p))))
   ((("-r" n "-h" p "-")) (loop repeat (parse-integer n) do
                               (stream-bits *standard-output* (as-hex p))))
   ((("-r" n "-h" p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
                             (loop repeat (parse-integer n) do
                                  (stream-bits s (as-hex p)))))
-  ((("-r" n p "-")) (loop repeat (parse-integer n) do
-                         (stream-bits *standard-output* (as-bin p))))
+  ((("-r" n p "-")) (stream-bits *standard-output*
+                                 (blit (* (parse-integer n) (length (pattern p))) (pattern p))))
   ((("-r" n p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
-                      (loop repeat (parse-integer n) do
-                           (stream-bits s (as-bin p)))))
+                       (stream-bits s (blit (* (parse-integer n) (length (pattern p)))
+                                            (pattern p)))))
   ((_) (usage)))
 
 (defun main (&rest argv)

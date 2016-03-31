@@ -9,14 +9,16 @@ exec ros -Q -- $0 "$@"
 (in-package :ros.script.binary.3667843148)
 
 (defun usage ()
+  (write-line "slip - shift the bits in a file")
+  (terpri)
   (write-line "Usage: slip [-1] [-l | -r] num-bits infile outfile")
   (terpri)
   (write-line "-1: pad with ones instead of zeros") 
   (write-line "-l: slip to the left")
   (write-line "-r: slip to the right")
   (write-line "num-bits: number of bits to slip")
-  (write-line "infile: name of file to read")
-  (write-line "outfile: name of file to write, or - for standard out"))
+  (write-line "infile: name of file to read, or - for stdin")
+  (write-line "outfile: name of file to write, or - for stdout"))
 
 (defun/match slip (l)
   ((("-l" n "-" "-")) (write-slip n *standard-output* (inbits) 0 #'slip-l))

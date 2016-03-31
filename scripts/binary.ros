@@ -9,6 +9,8 @@ exec ros -Q -- $0 "$@"
 (in-package :ros.script.binary.3667843148)
 
 (defun usage ()
+  (write-line "binary - dump data as binary or hex to the screen")
+  (terpri)
   (write-line "Usage: binary [-h] filename")
   (terpri)
   (write-line "-h: dump in hex instead of binary")

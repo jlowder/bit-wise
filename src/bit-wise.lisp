@@ -21,6 +21,7 @@
            :as-hex
            :write-slip
            :inbits
+           :blit
 	   :xor-bits))
 
 (in-package :bit-wise)
@@ -126,7 +127,7 @@
   (bit-not bits))
 
 (defun stream-bits (s bits)
-  (loop for b in (bits->bytes bits)
+  (loop for b in (bits->bytes (padright bits))
      do (write-byte b s)))
 
 (defun as-bin (p)
