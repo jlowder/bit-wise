@@ -75,7 +75,7 @@ Usage:
 
 ## genbin
 
-This will generate bit patterns which can used to create test data. Patterns can be repeating binary sequences, hex
+This will generate bit patterns which can be used to create test data. Patterns can be repeating binary sequences, hex
 sequences, incrementing integers, or pseudo-random bit sequences. Be advised the high-degree prbs sequences can be quite
 large, for example the prbs-23 sequence is 23 megabytes long.
 
