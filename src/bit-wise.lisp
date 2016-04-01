@@ -1,7 +1,7 @@
 (in-package :cl-user)
 
 (defpackage bit-wise
-  (:use :cl)
+  (:use :cl :rmatch)
   (:export :byte->bits
            :bits->byte
            :bits->bytes
@@ -22,7 +22,8 @@
            :write-slip
            :inbits
            :blit
-	   :xor-bits))
+	   :xor-bits
+           :prbs))
 
 (in-package :bit-wise)
 
@@ -159,3 +160,53 @@
 (defun xor-bits (sl bl)
   "xor a small list into a bigger list"
   (bit-xor (blit (length bl) sl) bl))
+
+(defun bv2int (b &optional (m 1) (a 0))
+  (if (equal #* b)
+      a
+      (let ((e (- (length b) 1)))
+        (bv2int (subseq b 0 e) (* 2 m) (+ a (* m (elt b e)))))))
+
+(defun bitbv (n)
+  (if (eq 0 n)
+      #*0
+      #*1))
+
+(defun prbs-n (bv t1 t2)
+  (flet ((newbit (bv)
+           (logxor (elt bv t1) (elt bv t2))))
+    (concatenate 'bit-vector
+                 (subseq bv 1)
+                 (bitbv (newbit bv)))))
+
+(defun gen-prbs (init n t1 t2)
+    (loop repeat (- (expt 2 n) 1)
+     as x = init then (prbs-n x t1 t2)
+     collect (bv2int x)))
+
+(defun gen-prbs-bv (init n t1 t2)
+  (let* ((len (* n (- (expt 2 n) 1)))
+         (bv (make-sequence 'bit-vector len)))
+    (loop 
+       for y from 0 to len by n
+       as x = init then (prbs-n x t1 t2)
+       do (replace bv x :start1 y))
+    bv))
+       
+(defun/match prbs (n)
+  ((3) (gen-prbs-bv #*010 n 0 1))
+  ((4) (gen-prbs-bv #*0010 n 0 1))
+  ((5) (gen-prbs-bv #*00010 n 0 2))
+  ((6) (gen-prbs-bv #*000010 n 0 1))
+  ((7) (gen-prbs-bv #*0000010 n 0 1))
+  ((8) (gen-prbs-bv #*00000010 n 0 1))
+  ((9) (gen-prbs-bv #*000000010 n 0 4))
+  ((10) (gen-prbs-bv #*0000000010 n 0 3))
+  ((11) (gen-prbs-bv #*00000000010 n 0 2))
+  ((12) (gen-prbs-bv #*000000000010 n 0 3))
+  ((15) (gen-prbs-bv #*000000000000010 n 0 1))
+  ((17) (gen-prbs-bv #*00000000000000010 n 0 3))
+  ((18) (gen-prbs-bv #*000000000000000010 n 0 7))
+  ((20) (gen-prbs-bv #*00000000000000000010 n 0 17))
+  ((23) (gen-prbs-bv #*00000000000000000000010 n 0 5))
+  ((_) nil))
