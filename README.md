@@ -90,7 +90,7 @@ Usage:
              generate incrementing (or decrementing) integers from X to Y.
     -prbs n: generate a pseudo-random bit sequence using polynomial of degree
              n. The resulting sequence will have a length of n * (2^n-1) bits.
-             Supported degrees: 3 4 5 6 7 8 9 10 11 12 15 17 18 20 23.
+             Supported degrees: 3 through 23.
     filename: output filename, or - for stdout
 
 ## binary

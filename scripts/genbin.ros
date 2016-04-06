@@ -20,7 +20,7 @@ exec ros -Q -- $0 "$@"
   (write-line "         generate incrementing (or decrementing) integers from X to Y.")
   (write-line "-prbs n: generate a pseudo-random bit sequence using polynomial of degree")
   (write-line "         n. The resulting sequence will have a length of n * (2^n-1) bits.")
-  (write-line "         Supported degrees: 3 4 5 6 7 8 9 10 11 12 15 17 18 20 23.")
+  (write-line "         Supported degrees: 3 through 23.")
   (write-line "filename: output filename, or - for stdout"))
 
 (defun pattern (p)
