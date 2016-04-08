@@ -2,7 +2,9 @@
 
 (defpackage bit-wise
   (:use :cl :rmatch)
-  (:export :byte->bits
+  (:export :num->bv
+           :bv->num
+           :bitbv
            :bits->byte
            :bits->bytes
            :bytes->bits
@@ -27,8 +29,8 @@
 
 (in-package :bit-wise)
 
-(defun byte->bits (val)
-  (coerce (loop for i from 7 downto 0
+(defun num->bv (val &optional (size 8))
+  (coerce (loop for i from (1- size) downto 0
              collect (ldb (byte 1 i) val)) 'bit-vector))
 
 (defun bits->byte (bits &optional (mult 128))
@@ -43,18 +45,18 @@
 
 (defun bytes->bits (b)
   (when b
-    (concatenate 'bit-vector (byte->bits (car b)) (bytes->bits (cdr b)))))
+    (concatenate 'bit-vector (num->bv (car b)) (num->bv (cdr b)))))
 
 (defun stream->bits (stream &optional (v #*))
   (let ((b (read-byte stream nil nil)))
     (if b
-        (stream->bits stream (concatenate 'bit-vector v (byte->bits b)))
+        (stream->bits stream (concatenate 'bit-vector v (num->bv b)))
         v)))
 
 (defun seq->bits (seq bits)
   (loop for x across seq
         as j = 0 then (+ 1 j)
-        do (replace bits (byte->bits (elt seq j)) :start1 (* j 8)))
+        do (replace bits (num->bv (elt seq j)) :start1 (* j 8)))
   bits)
   
 (defun file->bits (name)
@@ -161,11 +163,11 @@
   "xor a small list into a bigger list"
   (bit-xor (blit (length bl) sl) bl))
 
-(defun bv2int (b &optional (m 1) (a 0))
+(defun bv->num (b &optional (m 1) (a 0))
   (if (equal #* b)
       a
       (let ((e (- (length b) 1)))
-        (bv2int (subseq b 0 e) (* 2 m) (+ a (* m (elt b e)))))))
+        (bv->num (subseq b 0 e) (* 2 m) (+ a (* m (elt b e)))))))
 
 (defun bitbv (n)
   (if (eq 0 n)
@@ -185,7 +187,7 @@
 (defun gen-prbs (init n taps)
     (loop repeat (- (expt 2 n) 1)
      as x = init then (prbs-n x taps)
-     collect (bv2int x)))
+     collect (bv->num x)))
 
 (defun gen-prbs-bv (init n t1 t2 &rest taps)
   (let* ((len (* n (- (expt 2 n) 1)))
