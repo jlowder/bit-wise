@@ -45,7 +45,7 @@
 
 (defun bytes->bits (b)
   (when b
-    (concatenate 'bit-vector (num->bv (car b)) (num->bv (cdr b)))))
+    (concatenate 'bit-vector (num->bv (car b)) (bytes->bits (cdr b)))))
 
 (defun stream->bits (stream &optional (v #*))
   (let ((b (read-byte stream nil nil)))
