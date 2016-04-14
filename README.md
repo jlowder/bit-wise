@@ -81,6 +81,8 @@ large, for example the prbs-23 sequence is 23 megabytes long.
 
 Usage:
 
+    genbin - generate binary patterns
+    
     genbin [-r num] [ [-h] pattern | -prbs n ] filename
     
     -r num: repeat the pattern num times
@@ -88,9 +90,9 @@ Usage:
     pattern: pattern to generate. Binary is assumed unless -h is used, or 
              if the pattern has the format  "X..Y". In that case it will
              generate incrementing (or decrementing) integers from X to Y.
-    -prbs n: generate a pseudo-random bit sequence using polynomial of degree
-             n. The resulting sequence will have a length of n * (2^n-1) bits.
-             Supported degrees: 3 through 23.
+    -prbs n: generate a pseudo-random bit sequence using a polynomial of degree
+             n, which should be 3 or higher. The resulting sequence will have
+             a length of n * ((2^n)-1) bits.
     filename: output filename, or - for stdout
 
 ## binary

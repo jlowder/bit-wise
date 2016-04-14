@@ -18,9 +18,9 @@ exec ros -Q -- $0 "$@"
   (write-line "pattern: pattern to generate. Binary is assumed unless -h is used, or ")
   (write-line "         if the pattern has the format  \"X..Y\". In that case it will")
   (write-line "         generate incrementing (or decrementing) integers from X to Y.")
-  (write-line "-prbs n: generate a pseudo-random bit sequence using polynomial of degree")
-  (write-line "         n. The resulting sequence will have a length of n * (2^n-1) bits.")
-  (write-line "         Supported degrees: 3 through 23.")
+  (write-line "-prbs n: generate a pseudo-random bit sequence using a polynomial of degree")
+  (write-line "         n, which should be 3 or higher. The resulting sequence will have")
+  (write-line "         a length of n * ((2^n)-1) bits.")
   (write-line "filename: output filename, or - for stdout"))
 
 (defun pattern (p)
