@@ -3,9 +3,9 @@
 #|
 exec ros -Q -- $0 "$@"
 |#
-(ql:quickload '(:bit-wise :rmatch :cl-ppcre) :silent t)
+(ql:quickload '(:bit-wise :rmatch :cl-ppcre :prbs) :silent t)
 (defpackage :ros.script.genbin.3668173254
-  (:use :cl :bit-wise :rmatch :cl-ppcre))
+  (:use :cl :bit-wise :rmatch :cl-ppcre :prbs))
 (in-package :ros.script.genbin.3668173254)
 
 (defun usage ()
@@ -33,6 +33,11 @@ exec ros -Q -- $0 "$@"
                            (loop for x from a downto b collect x))))
         (as-bin a))))
 
+(defun prbs (n &optional (repeat "1"))
+  (let ((n (parse-integer n))
+        (repeat (parse-integer repeat)))
+    (funcall (bit-gen n) (* repeat (seq-length n)))))
+
 (defun/match genbin (l)
   ((("-h" p "-")) (stream-bits *standard-output* (as-hex p)))
   ((("-h" p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
@@ -50,12 +55,12 @@ exec ros -Q -- $0 "$@"
   ((("-r" n p name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
                        (stream-bits s (blit (* (parse-integer n) (length (pattern p)))
                                             (pattern p)))))
-  ((("-prbs" n "-")) (stream-bits *standard-output* (prbs (parse-integer n))))
+  ((("-prbs" n "-")) (stream-bits *standard-output* (prbs n)))
   ((("-prbs" n name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
-                       (stream-bits s (prbs (parse-integer n)))))
-  ((("-r" r "-prbs" n "-")) (stream-bits *standard-output* (blit (* (parse-integer r) (* (parse-integer n) (- (expt 2 (parse-integer n)) 1))) (prbs (parse-integer n)))))
+                       (stream-bits s (prbs n))))
+  ((("-r" r "-prbs" n "-")) (stream-bits *standard-output* (prbs n r)))
   ((("-r" r "-prbs" n name)) (with-open-file (s name :direction :output :element-type 'unsigned-byte :if-exists :append :if-does-not-exist :create)
-                               (stream-bits s (blit (* (parse-integer r) (* (parse-integer n) (- (expt 2 (parse-integer n)) 1))) (prbs (parse-integer n))))))
+                               (stream-bits s (prbs n r))))
   ((_) (usage)))
 
 (defun main (&rest argv)

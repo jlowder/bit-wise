@@ -24,8 +24,7 @@
            :write-slip
            :inbits
            :blit
-	   :xor-bits
-           :prbs))
+	   :xor-bits))
 
 (in-package :bit-wise)
 
@@ -174,50 +173,3 @@
       #*0
       #*1))
 
-(defun prbs-n (bv taps)
-  (flet ((newbit (bv)
-           (match taps
-             ((t1 t2) (logxor (elt bv t1) (elt bv t2)))
-             ((t1 t2 t3 t4) (logxor (elt bv t1) (elt bv t2)
-                                    (elt bv t3) (elt bv t4))))))
-    (concatenate 'bit-vector
-                 (subseq bv 1)
-                 (bitbv (newbit bv)))))
-
-(defun gen-prbs (init n taps)
-    (loop repeat (- (expt 2 n) 1)
-     as x = init then (prbs-n x taps)
-     collect (bv->num x)))
-
-(defun gen-prbs-bv (init n t1 t2 &rest taps)
-  (let* ((len (* n (- (expt 2 n) 1)))
-         (bv (make-sequence 'bit-vector len)))
-    (loop 
-       for y from 0 to len by n
-       as x = init then (prbs-n x (append (list t1 t2) taps))
-       do (replace bv x :start1 y))
-    bv))
-       
-(defun/match prbs (n)
-  ((3) (gen-prbs-bv #*010 n 0 1))
-  ((4) (gen-prbs-bv #*0010 n 0 1))
-  ((5) (gen-prbs-bv #*00010 n 0 2))
-  ((6) (gen-prbs-bv #*000010 n 0 1))
-  ((7) (gen-prbs-bv #*0000010 n 0 1))
-  ((8) (gen-prbs-bv #*00000010 n 0 2 3 4))
-  ((9) (gen-prbs-bv #*000000010 n 0 4))
-  ((10) (gen-prbs-bv #*0000000010 n 0 3))
-  ((11) (gen-prbs-bv #*00000000010 n 0 2))
-  ((12) (gen-prbs-bv #*000000000010 n 0 1 2 8))
-  ((13) (gen-prbs-bv #*0000000000010 n 0 1 2 5))
-  ((14) (gen-prbs-bv #*00000000000010 n 0 1 2 12))
-  ((15) (gen-prbs-bv #*000000000000010 n 0 1))
-  ((16) (gen-prbs-bv #*0000000000000010 n 0 1 3 12))
-  ((17) (gen-prbs-bv #*00000000000000010 n 0 3))
-  ((18) (gen-prbs-bv #*000000000000000010 n 0 7))
-  ((19) (gen-prbs-bv #*0000000000000000010 n 0 1 2 5))
-  ((20) (gen-prbs-bv #*00000000000000000010 n 0 17))
-  ((21) (gen-prbs-bv #*000000000000000000010 n 0 2))
-  ((22) (gen-prbs-bv #*0000000000000000000010 n 0 1))
-  ((23) (gen-prbs-bv #*00000000000000000000010 n 0 5))
-  ((_) nil))
