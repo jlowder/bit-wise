@@ -90,7 +90,7 @@ Usage:
     pattern: pattern to generate. Binary is assumed unless -h is used, or 
              if the pattern has the format  "X..Y". In that case it will
              generate incrementing (or decrementing) integers from X to Y.
-    -prbs n: generate a pseudo-random bit sequence using a polynomial of degree
+    -prbs n: generate a pseudo-random binary sequence using a polynomial of degree
              n, which should be 3 or higher. The resulting sequence will have
              a length of n * ((2^n)-1) bits.
     filename: output filename, or - for stdout
