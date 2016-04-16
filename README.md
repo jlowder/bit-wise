@@ -76,8 +76,8 @@ Usage:
 ## genbin
 
 This will generate bit patterns which can be used to create test data. Patterns can be repeating binary sequences, hex
-sequences, incrementing integers, or pseudo-random bit sequences. Be advised the high-degree prbs sequences can be quite
-large, for example the prbs-23 sequence is 23 megabytes long.
+sequences, incrementing integers, or pseudo-random binary sequences. Be advised the high-degree prbs sequences can be quite
+large, for example the PRBS-23 sequence is 23 megabytes long.
 
 Usage:
 
@@ -130,3 +130,7 @@ data is read a byte at a time and this results in an enormous amount
 of consing - which is very slow. And, these tools read the entire file
 into memory so they are not generally suited for anything over a
 couple dozen megabytes in size (at least in my experience).
+
+# License
+
+MIT
